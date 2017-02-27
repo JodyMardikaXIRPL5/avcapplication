@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Linq;
-using Asp_mvc_2.Models.ViewModel;
-using asp_mvc_2.Models.DB;
 using asp_mvc_2.Models.ViewModel;
+using asp_mvc_2.Models.DB;
 
 namespace asp_mvc_2.Models.EntityManager
 {
@@ -55,5 +54,26 @@ namespace asp_mvc_2.Models.EntityManager
                 return db.SYSUsers.Where(o => o.LoginName.Equals(loginName)).Any();
             }
         }
+
+        public bool IsUserInRole(string loginName, string roleName)
+        {
+            using (DemoDBEntities db = new DemoDBEntities())
+            {
+                SYSUser SU = db.SYSUsers.Where(o => o.LoginName.ToLower().Equals(loginName))?.FirstOrDefault();
+                if (SU != null)
+                {
+                    var roles = from q in db.SYSUserRoles
+                                join r in db.LOOKUPRoles on q.LOOKUPRoleID equals r.LOOKUPRoleID
+                                where r.RoleName.Equals(roleName) && q.SYSUserID.Equals(SU.SYSUserID)
+                                select r.RoleName;
+                    if (roles != null)
+                    {
+                        return roles.Any();
+                    }
+                }
+                return false;
+            }
+        }
     }
+
 }
